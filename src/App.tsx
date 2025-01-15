@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Person } from "./type";
 
 const App = () => {
-  const count = 100;
+  const count = 1000;
 
   // URL
   const url = process.env.REACT_APP_API_URL;
@@ -30,7 +30,27 @@ const App = () => {
   useEffect(() => {
     fetchGridData();
   }, []);
-  return <div>grid</div>;
+
+  return (
+    <>
+      <div className="flex flex-col justify-center items-center">
+        <h1 className="text-2xl font-bold mb-4">Grid</h1>
+
+        {/* table */}
+        <div>
+          <table className="bg-black">
+            <thead className="bg-slate-300">
+              <tr>
+                <th className="p-2">
+                  <input type="checkbox" />
+                </th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default App;
