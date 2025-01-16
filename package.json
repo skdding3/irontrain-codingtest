@@ -43,5 +43,8 @@
   },
   "devDependencies": {
     "web-vitals": "^4.2.4"
+  },
+  "overrides": {
+    "typescript": "^5.7.3"
   }
 }
