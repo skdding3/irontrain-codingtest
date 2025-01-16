@@ -4,13 +4,13 @@ Demo Link : https://irontrain-codingtest-skdding3s-projects.vercel.app/
 
 주어진 API와 조건을 토대로 과제를 진행하였습니다.
 
-프로젝트 실행 방법
+- 프로젝트 실행 방법
 ```bash
 npm install
 npm start
 ```
 
-라이브러리 선정은 다음과 같습니다.
+- 라이브러리 선정은 다음과 같습니다.
 
 ```Markdown
 React: 프론트엔드 라이브러리 
@@ -20,6 +20,7 @@ tailwindcss : css 프레임워크
 ```
 
 - 해결 과정
+
 우선 프론트엔드 개발을 진행할때 가장 먼저 주로 사용한 React와 TailwindCSS, axios 선정하였고, 이에 맞춰 개발을 진행하였습니다.
 라이브러리를 사용하지 않고 Grid를 구현하는 방법으로 table태그안에 테이블 내용을 map 함수를 활용하여, 데이터를 우선 뿌려주었습니다.
 해당 api 명세에 맞춰 interface를 파일로 따로 빼서 타입을 주입해주었습니다. (State도 타입 주입)
