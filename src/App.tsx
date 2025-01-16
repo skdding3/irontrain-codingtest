@@ -1,6 +1,7 @@
-import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
-import { Person } from './type';
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import { throttle } from "lodash";
+import { Person } from "./type";
 
 const App = () => {
   const initialCount = 100; // 처음 요청할 데이터 수
@@ -23,11 +24,11 @@ const App = () => {
 
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [sortKey, setSortKey] = useState<keyof Person | null>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
-  const [searchColumn, setSearchColumn] = useState('id');
-  const [searchParams, setSearchParams] = useState<any>('');
+  const [searchColumn, setSearchColumn] = useState("id");
+  const [searchParams, setSearchParams] = useState<any>("");
 
   // * EVENT
 
@@ -60,7 +61,7 @@ const App = () => {
     console.log(searchParams);
 
     const result = gridData.filter((person) => {
-      if (searchColumn === 'name') {
+      if (searchColumn === "name") {
         // firstname과 lastname을 합쳐서 검색
         const fullName = `${person.firstname} ${person.lastname}`.toLowerCase();
         return fullName.includes(searchParams.toLowerCase());
@@ -88,10 +89,10 @@ const App = () => {
 
   // 정렬 함수
   const handleSort = (key: keyof Person) => {
-    const newOrder = sortKey === key && sortOrder === 'asc' ? 'desc' : 'asc';
+    const newOrder = sortKey === key && sortOrder === "asc" ? "desc" : "asc";
     const sortedData = [...gridData].sort((a, b) => {
-      if (a[key] < b[key]) return newOrder === 'asc' ? -1 : 1;
-      if (a[key] > b[key]) return newOrder === 'asc' ? 1 : -1;
+      if (a[key] < b[key]) return newOrder === "asc" ? -1 : 1;
+      if (a[key] > b[key]) return newOrder === "asc" ? 1 : -1;
       return 0;
     });
     setSortKey(key);
@@ -102,9 +103,9 @@ const App = () => {
   // 정렬 표시를 위한 유틸리티 함수
   const getSortIndicator = (key: keyof Person) => {
     if (sortKey === key) {
-      return <span className='text-xs'>{sortOrder === 'asc' ? '▲' : '▼'}</span>;
+      return <span className="text-xs">{sortOrder === "asc" ? "▲" : "▼"}</span>;
     }
-    return <span className='text-xs'>▼</span>;
+    return <span className="text-xs">▼</span>;
   };
 
   // 체크박스 클릭 핸들러
@@ -130,61 +131,61 @@ const App = () => {
 
   // * 스크롤 이벤트 추가
   useEffect(() => {
-    const handleContainerScroll = () => {
+    const handleContainerScroll = throttle(() => {
       if (
         containerRef.current &&
         containerRef.current.scrollTop + containerRef.current.clientHeight >=
-          containerRef.current.scrollHeight - 100
+          containerRef.current.scrollHeight - 3000 // scroll 높이에 따라 count 증가
       ) {
         setCount((prevCount) => prevCount + increment);
-        console.log(count);
       }
-    };
+    }, 300);
 
     const container = containerRef.current;
-    container?.addEventListener('scroll', handleContainerScroll);
+    container?.addEventListener("scroll", handleContainerScroll);
 
     return () => {
-      container?.removeEventListener('scroll', handleContainerScroll);
+      container?.removeEventListener("scroll", handleContainerScroll);
+      handleContainerScroll.cancel();
     };
   }, []);
 
   // * VIEW
   return (
     <>
-      <div className='flex flex-col '>
+      <div className="flex flex-col ">
         {/* header */}
-        <header className='flex justify-between mt-12 mb-4'>
-          <h1 className='text-2xl font-bold mb-4 mt-4 ml-36'>Grid</h1>
+        <header className="flex justify-between mt-12 mb-4">
+          <h1 className="text-2xl font-bold mb-4 mt-4 ml-36">Grid</h1>
 
-          <div className='flex justify-end mt-6 mr-36 gap-6'>
+          <div className="flex justify-end mt-6 mr-36 gap-6">
             <select
               value={searchColumn}
               onChange={(e) => setSearchColumn(e.target.value)}
-              className='border '
+              className="border border-black bg-slate-200"
             >
-              <option value='id'>ID</option>
-              <option value='name'>Name</option>
-              <option value='email'>Email</option>
-              <option value='phone'>Phone</option>
-              <option value='birthday'>Birthday</option>
+              <option value="id">ID</option>
+              <option value="name">Name</option>
+              <option value="email">Email</option>
+              <option value="phone">Phone</option>
+              <option value="birthday">Birthday</option>
             </select>
             <input
-              type='text'
-              placeholder='Search...'
-              className='border  '
+              type="text"
+              placeholder="Search..."
+              className="border border-black  bg-slate-200"
               value={searchParams}
               onChange={(e) => setSearchParams(e.target.value)}
             />
             <button
               onClick={handleSearch}
-              className='bg-blue-500 text-white px-4 py-2 rounded'
+              className="bg-black text-white px-4 py-2 rounded"
             >
               Search
             </button>
             <button
               onClick={handleReset}
-              className='bg-blue-500 text-white px-4 py-2 rounded'
+              className="bg-black text-white px-4 py-2 rounded"
             >
               초기화
             </button>
@@ -194,52 +195,52 @@ const App = () => {
         {/* table */}
         <div
           ref={containerRef}
-          className='container mx-auto mt-4 max-h-[800px] overflow-y-auto'
+          className="container mx-auto mt-4 max-h-[800px] overflow-y-auto"
         >
-          <table className='table-auto w-[85vw] border-collapse border border-gray-400'>
-            <thead className='bg-slate-200 '>
-              <tr className='border'>
-                <th className='border border-gray-400 px-4 py-2'>
+          <table className="table-auto w-full border-collapse border border-gray-400">
+            <thead className="bg-slate-200 sticky top-0 z-10">
+              <tr className="border">
+                <th className="border border-gray-400 px-4 py-2">
                   <input
-                    type='checkbox'
-                    className='w-4 h-4 border border-gray-400 rounded-lg'
+                    type="checkbox"
+                    className="w-4 h-4 border border-gray-400 rounded-lg"
                     checked={selectedRows.length === gridData.length}
                     onChange={handleCheckboxAll}
                   />
                 </th>
-                <th className='border border-gray-400 px-4 py-2'></th>
+                <th className="border border-gray-400 px-4 py-2"></th>
                 <th
-                  className='border border-gray-400 px-4 py-2 cursor-pointer'
-                  onClick={() => handleSort('id')}
+                  className="border border-gray-400 px-4 py-2 cursor-pointer"
+                  onClick={() => handleSort("id")}
                 >
-                  ID {getSortIndicator('id')}
+                  ID {getSortIndicator("id")}
                 </th>
                 <th
-                  className='border border-gray-400 px-4 py-2 cursor-pointer'
-                  onClick={() => handleSort('firstname')}
+                  className="border border-gray-400 px-4 py-2 cursor-pointer"
+                  onClick={() => handleSort("firstname")}
                 >
-                  Name {getSortIndicator('firstname')}
+                  Name {getSortIndicator("firstname")}
                 </th>
 
                 <th
-                  className='border border-gray-400 px-4 py-2 cursor-pointer'
-                  onClick={() => handleSort('email')}
+                  className="border border-gray-400 px-4 py-2 cursor-pointer"
+                  onClick={() => handleSort("email")}
                 >
-                  Email {getSortIndicator('email')}
+                  Email {getSortIndicator("email")}
                 </th>
                 <th
-                  className='border border-gray-400 px-4 py-2 cursor-pointer'
-                  onClick={() => handleSort('phone')}
+                  className="border border-gray-400 px-4 py-2 cursor-pointer"
+                  onClick={() => handleSort("phone")}
                 >
-                  Phone {getSortIndicator('phone')}
+                  Phone {getSortIndicator("phone")}
                 </th>
                 <th
-                  className='border border-gray-400 px-4 py-2 cursor-pointer'
-                  onClick={() => handleSort('birthday')}
+                  className="border border-gray-400 px-4 py-2 cursor-pointer"
+                  onClick={() => handleSort("birthday")}
                 >
-                  Birthday {getSortIndicator('birthday')}
+                  Birthday {getSortIndicator("birthday")}
                 </th>
-                <th className='border border-gray-400 px-4 py-2 cursor-pointer'>
+                <th className="border border-gray-400 px-4 py-2 cursor-pointer">
                   Website
                 </th>
               </tr>
@@ -251,7 +252,7 @@ const App = () => {
                   <React.Fragment key={person.id}>
                     {/* 메인 행 */}
                     <tr
-                      className='cursor-pointer'
+                      className="cursor-pointer"
                       onClick={(event) => {
                         // 행 클릭 시 체크박스를 클릭하지 않았다면 확장/축소
                         if (
@@ -263,60 +264,60 @@ const App = () => {
                         }
                       }}
                     >
-                      <td className='border px-4 py-2 text-center'>
+                      <td className="border px-4 py-2 text-center">
                         <input
-                          type='checkbox'
-                          className='w-4 h-4 border-2 border-gray-400 rounded-lg'
+                          type="checkbox"
+                          className="w-4 h-4 border-2 border-gray-400 rounded-lg"
                           checked={selectedRows.includes(person.id)}
                           onChange={() => handleRowSelection(person.id)}
                         />
                       </td>
-                      <td className='border border-gray-400 px-4 py-2 text-center'>
+                      <td className="border border-gray-400 px-4 py-2 text-center">
                         <button
                           onClick={() => toggleRow(person.id)}
-                          className='rounded hover:bg-gray-400'
+                          className="rounded hover:bg-gray-400"
                         >
-                          <span className='text-sm'>
-                            {isExpanded ? '▲' : '▼'}
+                          <span className="text-sm">
+                            {isExpanded ? "▲" : "▼"}
                           </span>
                         </button>
                       </td>
-                      <td className='border border-gray-400 px-4 py-2'>
+                      <td className="border border-gray-400 px-4 py-2">
                         {person.id}
                       </td>
-                      <td className='border border-gray-400 px-4 py-2 relative group'>
+                      <td className="border border-gray-400 px-4 py-2 relative group">
                         {person.firstname} {person.lastname}
                         {/* Tooltip */}
-                        <div className='absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100'>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100">
                           {person.firstname} {person.lastname}
                         </div>
                       </td>
 
-                      <td className='border border-gray-400 px-4 py-2 relative group'>
+                      <td className="border border-gray-400 px-4 py-2 relative group">
                         {person.email}
                         {/* Tooltip */}
-                        <div className='absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100'>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100">
                           {person.email}
                         </div>
                       </td>
-                      <td className='border border-gray-400 px-4 py-2 relative group'>
+                      <td className="border border-gray-400 px-4 py-2 relative group">
                         {person.phone}
                         {/* Tooltip */}
-                        <div className='absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100'>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100">
                           {person.phone}
                         </div>
                       </td>
-                      <td className='border border-gray-400 px-4 py-2 relative group'>
+                      <td className="border border-gray-400 px-4 py-2 relative group">
                         {person.birthday}
                         {/* Tooltip */}
-                        <div className='absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100'>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100">
                           {person.birthday}
                         </div>
                       </td>
-                      <td className='border border-gray-400 px-4 py-2 relative group'>
+                      <td className="border border-gray-400 px-4 py-2 relative group">
                         {person.website}
                         {/* Tooltip */}
-                        <div className='absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100'>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100">
                           {person.website}
                         </div>
                       </td>
@@ -326,10 +327,10 @@ const App = () => {
                       <tr>
                         <td
                           colSpan={8}
-                          className='border border-gray-400 px-4 py-2 bg-gray-100'
+                          className="border border-gray-400 px-4 py-2 bg-gray-100"
                         >
                           <div>
-                            <p className='flex justify-center text-xl font-bold'>
+                            <p className="flex justify-center text-xl font-bold">
                               Address
                             </p>
                             <p>
@@ -357,7 +358,7 @@ const App = () => {
 
         {/* 로딩 중 표시 */}
         {isLoading && (
-          <div className='text-center text-xl font-bold mt-6'>Loading...</div>
+          <div className="text-center text-xl font-bold mt-6">Loading...</div>
         )}
       </div>
     </>
