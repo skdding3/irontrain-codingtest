@@ -195,7 +195,7 @@ const App = () => {
         {/* table */}
         <div
           ref={containerRef}
-          className="container mx-auto mt-4 max-h-[800px] overflow-y-auto"
+          className="container mx-auto mt-4 mb-6 max-h-[800px] overflow-y-auto"
         >
           <table className="table-auto w-full border-collapse border border-gray-400">
             <thead className="bg-slate-200 sticky top-0 z-10">
